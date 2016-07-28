@@ -3,8 +3,6 @@
  * https://github.com/facebook/react-native
  * @flow
  */
-require("react-native-azure-ad")
-
 
 import {ReactNativeAD, ADLoginView, Logger} from 'react-native-azure-ad';
 import React, { Component } from 'react';
@@ -12,7 +10,8 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  Navigator  
 } from 'react-native';
 
 Logger.setLevel('VERBOSE')
@@ -29,39 +28,111 @@ const config = {
   ]
 };
 
+var PageOne = React.createClass({
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.welcome}>
+          Login Succeed!
+        </Text>
+        <Text style={styles.instructions}>
+          To get started, edit index.ios.js
+        </Text>
+        <Text style={styles.instructions}>
+          Press Cmd+R to reload,{'\n'}
+          Cmd+D or shake for dev menu
+        </Text>
+        <Text>Hello world!</Text>
+      </View>
+    );
+  },
+});
 
-class AwesomeProject extends Component {
-    constructor(props) {
-        super(props)
-        new ReactNativeAD(config)
-    }
 
-    render() {
-        return (
-          <View style={styles.container}>
-            <ADLoginView context={ReactNativeAD.getContext(config.client_id)}
-              needLogout={false}
-              hideAfterLogin={true}
-              onSuccess={this.onLoginSuccess.bind(this)}
-            />
-          </View>
-        )
+class LoginScene extends Component {
+  constructor(props) {
+      super(props)
+      new ReactNativeAD(config)
+  }
+  
+  getDefaultProps() {
+    return {
+      title: 'Login'
+    };
   }
 
-      onLoginSuccess(cred) {
-        //log.error(cred)
-        Alert.alert(
-          'Login succeeded!',
-          'Login succeeded!',
-          [
-            {text: 'Ask me later', onPress: () => console.log('Ask me later pressed')},
-            {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-            {text: 'OK', onPress: () => console.log('OK Pressed')},
-          ]
-        )
-        console.log(cred)
-      }
+  render() {
+    return (
+      <View style={styles.container}>
+        <ADLoginView context={ReactNativeAD.getContext(config.client_id)}
+          needLogout={false}
+          hideAfterLogin={true}
+          onSuccess={this.onLoginSuccess.bind(this)}
+        />
+      </View>
+    )
+  }
+  
+  onLoginSuccess(cred) {      
+    console.log('onLoginSuccess', cred)
+    this.props.navigator.push({
+      name: 'Home', // Matches route.name
+    })
+  }
 }
+
+
+class HomeScene extends Component {
+  getDefaultProps() {
+    return {
+      title: 'Home'
+    };
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.welcome}>
+          Login Succeed!
+        </Text>
+        <Text style={styles.instructions}>
+          To get started, edit index.ios.js
+        </Text>
+        <Text style={styles.instructions}>
+          Press Cmd+R to reload,{'\n'}
+          Cmd+D or shake for dev menu
+        </Text>
+        <Text>Hello world!</Text>
+      </View>
+    );
+  }
+}
+
+
+class AwesomeProject extends Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <Navigator
+        initialRoute={{ name: 'Login', index: 0 }}
+        renderScene= { this.renderScene }
+      />
+    )
+  }
+  
+  renderScene(route, navigator) {
+    if(route.name == 'Login') {
+      return <LoginScene navigator={navigator} />
+    }
+    
+    if(route.name == 'Home') {
+      return <HomeScene navigator={navigator} />
+    }
+  }
+};
 
 const styles = StyleSheet.create({
   container: {
